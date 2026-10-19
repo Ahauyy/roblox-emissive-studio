@@ -1,0 +1,17 @@
+{
+  "name": "roblox-emissive-studio",
+  "version": "1.0.0",
+  "description": "Professional Roblox UGC EmissiveMask Generator & PBR Workstation",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.183.0"
+  },
+  "devDependencies": {
+    "vite": "^7.3.0"
+  }
+}

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roblox EmissiveMask Studio | PBR Texture Workstation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Top Header -->
+    <header class="studio-header">
+      <div class="logo-group">
+        <div class="studio-badge-icon">⚡</div>
+        <div class="logo-titles">
+          <h1>Roblox EmissiveMask Studio</h1>
+          <span class="subtitle">AI & Deterministic PBR Texture Generator for UGC Accessories</span>
+        </div>
+        <span class="version-tag">v1.0.0 PBR</span>
+      </div>
+
+      <div class="header-actions">
+        <button id="btn-load-sample" class="btn btn-secondary" title="Muat contoh Diffuse & UV kristal merah & biru bawaan">
+          <span>💎</span> Muat Contoh User (Kristal Merah & Biru)
+        </button>
+        <button id="btn-export-png" class="btn btn-primary" title="Download 1024x1024 PNG untuk SurfaceAppearance Roblox">
+          <span>⬇️</span> Download EmissiveMask (PNG)
+        </button>
+        <button id="btn-view-lua" class="btn btn-outline" title="Salin skrip Luau untuk Roblox Studio">
+          <span>📜</span> Roblox Lua Script
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="studio-layout">
+      <!-- Left Sidebar: Controls & Inputs -->
+      <aside class="sidebar-panel control-sidebar">
+        <!-- Dual Dropzone -->
+        <section class="panel-section">
+          <h2 class="section-title"><span>📂</span> Input Tekstur (1024×1024)</h2>
+          <div class="dropzone-grid">
+            <div class="dropzone" id="drop-diffuse">
+              <input type="file" id="file-diffuse" accept="image/*" hidden>
+              <div class="dropzone-preview" id="preview-diffuse"></div>
+              <div class="dropzone-prompt">
+                <span class="dz-icon">🎨</span>
+                <span class="dz-label">Diffuse Map</span>
+                <span class="dz-hint">Klik / Drag ColorMap</span>
+              </div>
+            </div>
+
+            <div class="dropzone" id="drop-uv">
+              <input type="file" id="file-uv" accept="image/*" hidden>
+              <div class="dropzone-preview" id="preview-uv"></div>
+              <div class="dropzone-prompt">
+                <span class="dz-icon">📐</span>
+                <span class="dz-label">UV Layout</span>
+                <span class="dz-hint">Klik / Drag Wireframe</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Prompt Engine -->
+        <section class="panel-section">
+          <div class="section-header-flex">
+            <h2 class="section-title"><span>🤖</span> Semantic Masking Prompt</h2>
+            <span class="badge-nlp">NLP Active</span>
+          </div>
+          
+          <div class="prompt-box">
+            <textarea id="prompt-input" rows="3" placeholder="Tulis instruksi bagian yang ingin dibuat bersinar (e.g. 'buatkan emmisivemask pada bagian yang berwarna Biru dan Merah sesuai UV layout')..."></textarea>
+            <button id="btn-generate" class="btn btn-accent">
+              <span>✨</span> Generate EmissiveMask
+            </button>
+          </div>
+
+          <!-- Quick Presets -->
+          <div class="preset-chips">
+            <span class="preset-label">Preset Cepat:</span>
+            <button class="chip" data-preset="buatkan emmisivemask pada bagian yang berwarna Biru dan Merah sesuai UV layout">
+              🔷🔴 Biru & Merah (Contoh)
+            </button>
+            <button class="chip" data-preset="buatkan emissive mask hanya pada kristal berwarna merah dengan kontras tinggi">
+              🔴 Merah Saja
+            </button>
+            <button class="chip" data-preset="buatkan emissive mask pada bagian berwarna biru glowing">
+              🔷 Biru Glowing
+            </button>
+            <button class="chip" data-preset="buatkan emissivemask pada semua aksen warna cerah yang saturated">
+              ✨ Semua Kristal Saturated
+            </button>
+          </div>
+        </section>
+
+        <!-- Fine-Tuning Sliders -->
+        <section class="panel-section">
+          <h2 class="section-title"><span>🎛️</span> Parameter PBR Roblox</h2>
+
+          <div class="slider-control">
+            <div class="slider-label-row">
+              <label for="slider-boost">Emissive Boost (Intensitas)</label>
+              <span class="slider-value" id="val-boost">1.4x</span>
+            </div>
+            <input type="range" id="slider-boost" min="0.8" max="3.0" step="0.05" value="1.4">
+          </div>
+
+          <div class="slider-control">
+            <div class="slider-label-row">
+              <label for="slider-gamma">Crevice Shading (Gamma Kontras)</label>
+              <span class="slider-value" id="val-gamma">0.75</span>
+            </div>
+            <input type="range" id="slider-gamma" min="0.4" max="1.5" step="0.05" value="0.75">
+            <span class="field-hint">Mencegah mask menjadi siluet datar; mempertahankan detail retakan 3D</span>
+          </div>
+
+          <div class="slider-control">
+            <div class="slider-label-row">
+              <label for="slider-tolerance">Color Sensitivity (Toleransi)</label>
+              <span class="slider-value" id="val-tolerance">1.0x</span>
+            </div>
+            <input type="range" id="slider-tolerance" min="0.5" max="2.0" step="0.1" value="1.0">
+          </div>
+
+          <div class="slider-control">
+            <div class="slider-label-row">
+              <label for="slider-padding">Roblox Seam Bleed (Padding)</label>
+              <span class="slider-value" id="val-padding">3 px</span>
+            </div>
+            <input type="range" id="slider-padding" min="0" max="8" step="1" value="3">
+            <span class="field-hint">Dilation tepi UV untuk mencegah garis hitam saat Mipmapping di Roblox</span>
+          </div>
+
+          <div class="checkbox-row">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="check-invert">
+              <span class="checkmark"></span>
+              Invert Emissive Mask
+            </label>
+          </div>
+        </section>
+      </aside>
+
+      <!-- Center: 2D Canvas Inspector -->
+      <section class="canvas-center-panel">
+        <div class="viewport-toolbar">
+          <div class="tab-group" id="canvas-tabs">
+            <button class="tab-btn active" data-tab="emissive">
+              <span>🎭</span> Emissive Mask (Hasil Gambar 3)
+            </button>
+            <button class="tab-btn" data-tab="glow">
+              <span>🌟</span> Simulasi Glow Roblox
+            </button>
+            <button class="tab-btn" data-tab="split">
+              <span>↔️</span> Split Compare (Diffuse vs Mask)
+            </button>
+            <button class="tab-btn" data-tab="diffuse">
+              <span>🎨</span> Diffuse Map
+            </button>
+            <button class="tab-btn" data-tab="uv">
+              <span>📐</span> UV Wireframe
+            </button>
+          </div>
+
+          <div class="canvas-tools">
+            <button id="btn-zoom-fit" class="tool-btn" title="Sesuaikan dengan Layar">⛶ Fit</button>
+            <button id="btn-zoom-100" class="tool-btn" title="Zoom 100% (1:1)">1:1</button>
+          </div>
+        </div>
+
+        <div class="canvas-wrapper" id="canvas-container">
+          <canvas id="main-canvas"></canvas>
+          <canvas id="overlay-canvas"></canvas>
+        </div>
+
+        <!-- Live Statistics Bar -->
+        <div class="stats-footer-bar">
+          <div class="stat-item">
+            <span class="stat-label">Status:</span>
+            <span class="stat-val status-badge" id="stat-status">Siap</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Kecepatan Pipeline:</span>
+            <span class="stat-val" id="stat-time">0 ms</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">UV Islands Terdeteksi:</span>
+            <span class="stat-val" id="stat-islands">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Islands Aktif Bercahaya:</span>
+            <span class="stat-val highlight" id="stat-active-islands">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Resolusi Tekstur:</span>
+            <span class="stat-val" id="stat-res">1024 × 1024</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Sidebar: 3D Viewport & Island Inspector -->
+      <aside class="sidebar-panel preview-sidebar">
+        <!-- 3D PBR Viewport -->
+        <section class="panel-section viewport-3d-section">
+          <div class="section-header-flex">
+            <h2 class="section-title"><span>🧊</span> Realtime 3D Roblox Preview</h2>
+            <button id="btn-toggle-light" class="btn-icon" title="Ganti Mode Pencahayaan (Siang / Gelap Roblox)">🌙</button>
+          </div>
+          <div class="viewport-3d-container" id="viewport-3d-box"></div>
+          <div class="viewport-3d-controls">
+            <div class="mesh-selector">
+              <label>Model 3D:</label>
+              <select id="select-mesh-type">
+                <option value="crystal">Faceted Gem / Crystal Shard</option>
+                <option value="torus">Curved Armor Ring</option>
+                <option value="sphere">PBR Shader Sphere</option>
+              </select>
+            </div>
+            <span class="viewport-hint">🖱️ Drag mouse untuk memutar model 3D, Scroll untuk zoom</span>
+          </div>
+        </section>
+
+        <!-- UV Island Inspector -->
+        <section class="panel-section island-inspector-section">
+          <h2 class="section-title"><span>🔍</span> Inspektur UV Shell / Island</h2>
+          <div class="island-card" id="island-info-card">
+            <p class="empty-hint">Arahkan kursor pada kanvas 2D untuk menginspeksi pulau UV poligon model.</p>
+          </div>
+          <div class="manual-overrides" id="manual-override-container">
+            <span class="sub-label">Override Manual:</span>
+            <div class="override-tags" id="override-tags-list">
+              <span class="tag-empty">Belum ada pulau yang di-override manual.</span>
+            </div>
+            <button id="btn-clear-overrides" class="btn btn-tiny" style="display: none;">Reset Overrides</button>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+    <!-- Modal Lua Code -->
+    <div class="modal-backdrop" id="modal-lua" style="display: none;">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3>📜 Roblox Luau SurfaceAppearance Script</h3>
+          <button class="modal-close" id="btn-close-modal">✕</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">
+            Salin skrip di bawah dan tempelkan ke <strong>Command Bar</strong> di Roblox Studio setelah Anda memilih model Accessory Anda di Explorer:
+          </p>
+          <pre class="code-block"><code id="code-lua-content">-- Loading...</code></pre>
+        </div>
+        <div class="modal-footer">
+          <button id="btn-copy-lua" class="btn btn-primary">📋 Salin ke Clipboard</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
